@@ -31,6 +31,14 @@ package sqconfigdb;
 # Database handle
 my $DBH = 0;
 
+# hbase db?
+my $HBASEDB = 0;
+my $HBsocket;
+my $HBtransport;
+my $HBprotocol;
+my $HBclient;
+my $HBdriver = "trafconfhbdrv";
+
 sub addDbKeyName {
 
     if (not defined $DBH) {
@@ -199,12 +207,37 @@ sub addDbPersistData {
     my $keyName   = $_[0];
     my $valueName = $_[1];
 
-    my $insDbPersistStmt = $DBH->prepare("insert into monRegPersistData values (?, ?)");
+    if ($HBASEDB == 1) {
+        eval {
+            system($HBdriver, "addDbPersistData", $keyName, $valueName);
+        };
+        if ($?) {
+            print "Unable to add persist data\n"
+        }
+    } else {
+        my $insDbPersistStmt = $DBH->prepare("insert into monRegPersistData values (?, ?)");
 
-    $insDbPersistStmt->bind_param(1, $keyName);
-    $insDbPersistStmt->bind_param(2, $valueName);
+        $insDbPersistStmt->bind_param(1, $keyName);
+        $insDbPersistStmt->bind_param(2, $valueName);
 
-    $insDbPersistStmt->execute;
+        $insDbPersistStmt->execute;
+    }
+}
+
+sub delDbData {
+    if (not defined $DBH) {
+        # Database not available
+        return;
+    }
+
+    if ($HBASEDB == 1) {
+        eval {
+            system($HBdriver, "delDbData");
+        };
+        if ($?) {
+            print "Unable to delete data\n"
+        }
+    }
 }
 
 sub delDbPersistData {
@@ -213,8 +246,17 @@ sub delDbPersistData {
         return;
     }
 
-    my $delDbPersistStmt = $DBH->prepare("delete from monRegPersistData");
-    $delDbPersistStmt->execute;
+    if ($HBASEDB == 1) {
+        eval {
+            system($HBdriver, "delDbPersistData");
+        };
+        if ($?) {
+            print "Unable to delete persist data\n"
+        }
+    } else {
+        my $delDbPersistStmt = $DBH->prepare("delete from monRegPersistData");
+        $delDbPersistStmt->execute;
+    }
 }
 
 # Physical node table
@@ -225,19 +267,28 @@ sub addDbPNode {
         return;
     }
 
-    my $insDbPNodeStmt = $DBH->prepare("insert into pnode values (?, ?, ?, ?)");
-
     my $nodeId          = $_[0];
     my $nodeName        = $_[1];
     my $firstExcCore    = $_[2];
     my $lastExcCore     = $_[3];
 
-    $insDbPNodeStmt->bind_param(1, $nodeId);
-    $insDbPNodeStmt->bind_param(2, $nodeName);
-    $insDbPNodeStmt->bind_param(3, $firstExcCore);
-    $insDbPNodeStmt->bind_param(4, $lastExcCore);
+    if ($HBASEDB == 1) {
+        eval {
+            system($HBdriver, "addDbPNode", $nodeId, $nodeName, $firstExcCore, $lastExcCore);
+        };
+        if ($?) {
+            print "Unable to add pnode\n"
+        }
+    } else {
+        my $insDbPNodeStmt = $DBH->prepare("insert into pnode values (?, ?, ?, ?)");
 
-    $insDbPNodeStmt->execute;
+        $insDbPNodeStmt->bind_param(1, $nodeId);
+        $insDbPNodeStmt->bind_param(2, $nodeName);
+        $insDbPNodeStmt->bind_param(3, $firstExcCore);
+        $insDbPNodeStmt->bind_param(4, $lastExcCore);
+
+        $insDbPNodeStmt->execute;
+    }
 }
 
 # Logical node table
@@ -248,8 +299,6 @@ sub addDbLNode {
         return;
     }
 
-    my $insDbLNodeStmt = $DBH->prepare("insert into lnode values (?, ?, ?, ?, ? , ?)");
-
     my $lNodeId       = $_[0];
     my $pNodeId       = $_[1];
     my $numProcessors = $_[2];
@@ -257,14 +306,25 @@ sub addDbLNode {
     my $firstCore     = $_[4];
     my $lastCore      = $_[5];
 
-    $insDbLNodeStmt->bind_param(1, $lNodeId);
-    $insDbLNodeStmt->bind_param(2, $pNodeId);
-    $insDbLNodeStmt->bind_param(3, $numProcessors);
-    $insDbLNodeStmt->bind_param(4, $roleSet);
-    $insDbLNodeStmt->bind_param(5, $firstCore);
-    $insDbLNodeStmt->bind_param(6, $lastCore);
+   if ($HBASEDB == 1) {
+        eval {
+            system($HBdriver, "addDbLNode", $lNodeId, $pNodeId, $numProcessors, $roleSet, $firstCore, $lastCore);
+        };
+        if ($?) {
+            print "Unable to add lnode\n"
+        }
+    } else {
+        my $insDbLNodeStmt = $DBH->prepare("insert into lnode values (?, ?, ?, ?, ? , ?)");
 
-    $insDbLNodeStmt->execute;
+        $insDbLNodeStmt->bind_param(1, $lNodeId);
+        $insDbLNodeStmt->bind_param(2, $pNodeId);
+        $insDbLNodeStmt->bind_param(3, $numProcessors);
+        $insDbLNodeStmt->bind_param(4, $roleSet);
+        $insDbLNodeStmt->bind_param(5, $firstCore);
+        $insDbLNodeStmt->bind_param(6, $lastCore);
+
+        $insDbLNodeStmt->execute;
+    }
 }
 
 # Logical node table
@@ -316,10 +376,16 @@ sub openDb {
                   RaiseError => 1,
                   PrintError => 0,
                   ShowErrorStatement => 1};
-    $DBH = DBI->connect("dbi:SQLite:dbname=sqconfig.db","","",$dbargs);
-#   Disable database synchronization (fsync) because it slows down writes
-#   too much.
-    $DBH->do("PRAGMA synchronous = OFF");
+    if ($ENV{TRAF_CONFIG_DBSTORE} eq "HBASE") {
+        $HBASEDB = 1;
+    }
+    if ($HBASEDB == 1) {
+    } else {
+        $DBH = DBI->connect("dbi:SQLite:dbname=sqconfig.db","","",$dbargs);
+#       Disable database synchronization (fsync) because it slows down writes
+#       too much.
+        $DBH->do("PRAGMA synchronous = OFF");
+    }
 }
 
 1;

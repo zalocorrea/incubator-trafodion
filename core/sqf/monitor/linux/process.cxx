@@ -161,6 +161,7 @@ CProcess::CProcess (CProcess * parent, int nid, int pid, PROCESSTYPE type,
     , firstInstance_(true)
     , cmpOrEsp_(false)
     , trafConf_()
+    , trafConfDb_()
     , trafHome_()
     , trafVar_()
     , fd_stdin_(-1)
@@ -1483,6 +1484,11 @@ bool CProcess::Create (CProcess *parent, int & result)
     {
         trafConf_ = env ;
     }
+    env = getenv( "TRAF_CONFIG_DBSTORE" );
+    if (env)
+    {
+        trafConfDb_ = env ;
+    }
     env = getenv( "TRAF_HOME" );
     if (env)
     {
@@ -1560,6 +1566,7 @@ bool CProcess::Create (CProcess *parent, int & result)
     }
 
     setEnvStrVal ( childEnv, nextEnv, "TRAF_CONF", trafConf_.c_str() );
+    setEnvStrVal ( childEnv, nextEnv, "TRAF_CONFIG_DBSTORE", trafConfDb_.c_str() );
     setEnvStrVal ( childEnv, nextEnv, "TRAF_HOME", trafHome_.c_str() );
     setEnvStrVal ( childEnv, nextEnv, "TRAF_VAR", trafVar_.c_str() );
     setEnvStrVal ( childEnv, nextEnv, "USER", user );

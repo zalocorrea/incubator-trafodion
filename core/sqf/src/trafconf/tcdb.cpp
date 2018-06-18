@@ -34,6 +34,7 @@ using namespace std;
 #include "tctrace.h"
 //#include "tcdbmysql.h"
 #include "tcdbsqlite.h"
+#include "tcdbhbase.h"
 #include "tcdb.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,14 +99,24 @@ CTcdb::CTcdb( void )
                     }
                     else
                     {
-                        if ( tcDbType.length() == 0 )
+#ifdef USE_HBASE
+                        found = tcDbType.find( TC_STORE_HBASE );
+                        if (found != std::string::npos)
                         {
-                            char buf[TC_LOG_BUF_SIZE];
-                            snprintf( buf, sizeof(buf)
-                                    , "[%s], Environment variable TRAF_CONFIG_DBSTORE value (%s) invalid!\n"
-                                    , method_name, tcDbType.c_str() );
-                            TcLogWrite( TCDB_TCDB_2, TC_LOG_CRIT, buf );
-                            TRACE_EXIT;
+                            dbStorageType_ = TCDBHBASE;
+                        }
+                        else
+#endif
+                        {
+                            if ( tcDbType.length() == 0 )
+                            {
+                                char buf[TC_LOG_BUF_SIZE];
+                                snprintf( buf, sizeof(buf)
+                                        , "[%s], Environment variable TRAF_CONFIG_DBSTORE value (%s) invalid!\n"
+                                        , method_name, tcDbType.c_str() );
+                                TcLogWrite( TCDB_TCDB_2, TC_LOG_CRIT, buf );
+                                TRACE_EXIT;
+                            }
                         }
                     }
                 }
@@ -287,6 +298,11 @@ int CTcdb::Initialize( const char *rootNode
             case TCDBSQLITE:
                 tcdbStore_ = new CTcdbSqlite;
                 break;
+#ifdef USE_HBASE
+            case TCDBHBASE:
+                tcdbStore_ = new CTcdbHbase;
+                break;
+#endif
             default:
                 TRACE_EXIT;
                 return( TCNOTIMPLEMENTED );

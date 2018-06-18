@@ -928,6 +928,30 @@ int CTcdbSqlite::Close( void )
     return( TCSUCCESS );
 }
 
+int CTcdbSqlite::DeleteData( void )
+{
+    const char method_name[] = "CTcdbSqlite::DeleteData";
+    TRACE_ENTRY;
+
+    if ( !IsInitialized() )  
+    {
+        if (TcTraceSettings & (TC_TRACE_REGISTRY | TC_TRACE_REQUEST | TC_TRACE_INIT))
+        {
+            trace_printf( "%s@%d Database is not initialized for access!\n"
+                        , method_name, __LINE__);
+        }
+        TRACE_EXIT;
+        return( TCNOTINIT );
+    }
+
+    char buf[TC_LOG_BUF_SIZE];
+    snprintf( buf, sizeof(buf),
+              "[%s] NOT IMPLEMENTED\n"
+            , method_name );
+    TcLogWrite( SQLITE_DB_ACCESS_ERROR, TC_LOG_ERR, buf );
+    TRACE_EXIT;
+    return( TCDBOPERROR );
+}
 int CTcdbSqlite::DeleteNodeData( int pnid )
 {
     const char method_name[] = "CTcdbSqlite::DeleteNodeData";
@@ -2142,7 +2166,6 @@ int CTcdbSqlite::GetSNodeData( int pnid
         }
     }
 
-    int  spnid;
     int  sparedpnid;
     int  spareCount = 0;
 
@@ -2165,7 +2188,6 @@ int CTcdbSqlite::GetSNodeData( int pnid
                 }
             }
 
-            spnid = sqlite3_column_int(prepStmt, 0);
             sparedpnid = sqlite3_column_int(prepStmt, 1);
             spareNodeConfig.spare_pnid[spareCount] = sparedpnid;
             spareCount++;

@@ -526,6 +526,9 @@ sub openFiles {
 #        or die("unable to open $stopSSCP");
 
     sqconfigdb::openDb();
+    if ($g_DelFlag == 1) {
+        sqconfigdb::delDbData();
+    }
 }
 
 sub endGame {
@@ -593,6 +596,7 @@ sub doInit {
     $g_HostName= shift(@ARGV);
     $g_FTFlag= shift(@ARGV);
     $g_PERFFlag= shift(@ARGV);
+    $g_DelFlag= shift(@ARGV);
     # remaining args are input files
 
 

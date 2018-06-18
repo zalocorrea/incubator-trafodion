@@ -47,6 +47,10 @@ LIBSX	+= -lrt
 LIBSX	+=  -lsqlite3
 
 PROGS		= $(TRAFCONF)
+ifdef USE_HBASE
+PROGS +=	  $(TRAFCONFHBDRV)
+PROGS +=	  $(TRAFCONFHBTST)
+endif
 
 OBJTRAFCONFIG		= $(OUTDIR)/trafconfig.o \
 		  $(OUTDIR)/tcdb.o \
@@ -66,6 +70,31 @@ OBJTRAFCONF		= $(OUTDIR)/trafconf.o \
 		  $(OUTDIR)/otrace.o \
 		  $(OUTDIR)/threadtls.o
 
+ifdef USE_HBASE
+OBJTRAFCONFHB	= $(OUTDIR)/tcdbhbase.o \
+		  $(OUTDIR)/tcdbhbaseconfig.o \
+		  $(OUTDIR)/tcdbhbasegenconst.o \
+		  $(OUTDIR)/tcdbhbasegen.o \
+		  $(OUTDIR)/tcdbhbasegentypes.o \
+		  $(OUTDIR)/trace.o \
+		  $(OUTDIR)/otrace.o \
+		  $(OUTDIR)/threadtls.o
+
+OBJTRAFCONFHBDRV= $(OUTDIR)/tcdbhbasedriver.o \
+		  $(OUTDIR)/tcdbhbase.o \
+		  $(OUTDIR)/tcdbhbaseconfig.o \
+		  $(OUTDIR)/tcdbhbasegenconst.o \
+		  $(OUTDIR)/tcdbhbasegen.o \
+		  $(OUTDIR)/tcdbhbasegentypes.o \
+		  $(OUTDIR)/tcdbstore.o \
+		  $(OUTDIR)/tclog.o \
+		  $(OUTDIR)/tctrace.o \
+		  $(OUTDIR)/trace.o \
+		  $(OUTDIR)/otrace.o \
+		  $(OUTDIR)/threadtls.o
+
+OBJTRAFCONFHBTST= $(OUTDIR)/tcdbhbasetest.o
+endif
 
 # Targets
 # Uncomment the following target to disable parallel make
@@ -73,7 +102,14 @@ OBJTRAFCONF		= $(OUTDIR)/trafconf.o \
 
 all: make_progs
 
+ifdef USE_HBASE
+make_libs:
+	$(MAKE) gen-cpp
+	$(MAKE) $(LIBTRAFCONFHB)
+	$(MAKE) $(LIBS)
+else
 make_libs: $(LIBS)
+endif
 
 make_progs: make_libs 
 	$(MAKE) $(PROGS)
@@ -83,14 +119,40 @@ $(LIBEXPDIR)/libtrafconfig.so: $(OBJTRAFCONFIG)
 	@echo Building Trafodion Configuration Library
 	@echo 
 	@echo $(CXX) $(LIBSX) $(LNK_FLGS) -shared -o $@ $(OBJTRAFCONFIG)
-	$(CXX) $(LIBSX) $(LNK_FLGS) -shared -o $@ $(OBJTRAFCONFIG)
+	$(CXX) $(LIBSX) $(LNK_FLGS) -shared -o $@ $(OBJTRAFCONFIG) $(LIBTRAFCONFHBX) $(STATICLINKGLIB)
 
 $(BINEXPDIR)/trafconf: $(OBJTRAFCONF)
 	@echo 
 	@echo Building Trafodion Configuration Utility
 	@echo 
 	@echo $(CXX) $(LIBSX) $(CDEPFLAGS) $(FLAGS) $(OPTIONS) $(INCLUDES) -o $@ $(OBJTRAFCONF)
-	@$(CXX) $(LIBSX) $(LIBTRAFCONFIGX) $(CDEPFLAGS) $(FLAGS) $(OPTIONS) $(INCLUDES) -o $@ $(OBJTRAFCONF)
+	@$(CXX) $(LIBSX) $(LIBTRAFCONFIGX) $(CDEPFLAGS) $(FLAGS) $(OPTIONS) $(INCLUDES) -o $@ $(OBJTRAFCONF) $(LIBTRAFCONFHBX) $(LIBTHRIFTXX) $(STATICLINKGLIB)
+
+ifdef USE_HBASE
+$(LIBEXPDIR)/libtrafconfhb.so: $(OBJTRAFCONFHB)
+	@echo 
+	@echo Building Trafodion Configuration HB Library
+	@echo 
+	@echo $(CXX) $(LIBSX) $(LNK_FLGS) -shared -o $@ $(OBJTRAFCONFHB)
+	$(CXX) $(LIBSX) $(LNK_FLGS) -shared -o $@ $(OBJTRAFCONFHB) $(LIBTHRIFTXX) $(STATICLINKGLIB)
+
+$(BINEXPDIR)/trafconfhbdrv: $(OBJTRAFCONFHBDRV)
+	@echo 
+	@echo Building Trafodion Configuration HB driver
+	@echo 
+	@echo $(CXX) $(LIBSX) $(CDEPFLAGS) $(FLAGS) $(OPTIONS) $(INCLUDES) -o $@ $(OBJTRAFCONFHBDRV)
+	$(CXX) $(LIBSX) $(LIBTRAFCONFX) $(CDEPFLAGS) $(FLAGS) $(OPTIONS) $(INCLUDES) -o $@ $(OBJTRAFCONFHBDRV) $(LIBTHRIFTXX) $(STATICLINKGLIB)
+
+trafconfhbtest: $(OBJTRAFCONFHBTST)
+	@echo 
+	@echo Building Trafodion Configuration HB test
+	@echo 
+	@echo $(CXX) $(LIBSX) $(CDEPFLAGS) $(FLAGS) $(OPTIONS) $(INCLUDES) -o $@ $(OBJTRAFCONFHBTST)
+	$(CXX) $(LIBSX) $(LIBTRAFCONFX) $(CDEPFLAGS) $(FLAGS) $(OPTIONS) $(INCLUDES) -o $@ $(OBJTRAFCONFHBTST) -L$(LIBEXPDIR) -ltrafconfig $(LIBTHRIFTXX) $(STATICLINKGLIB)
+
+gen-cpp:
+	$(THRIFT) -r -gen cpp /mnt/dgeorge/TOOLS/hbase-1.2.0-cdh5.7.1/hbase-thrift/src/main/resources/org/apache/hadoop/hbase/thrift/Hbase.thrift
+endif
 
 stop:
 	-killall shell monitor
@@ -100,6 +162,7 @@ setup:
 
 clean:
 	$(RM) $(OUTDIR)/*.o $(CDEPFILES) $(LIBS) dgt* $(OUTDIR)/*.gcda $(OUTDIR)/*.gcno $(OUTDIR)/*.gcov *.gcda *.gcno *.gcov
+	$(RM) -fr gen-cpp
 	$(MAKE) cleantrafconfig cleantrafconf
 
 cleanall: clean

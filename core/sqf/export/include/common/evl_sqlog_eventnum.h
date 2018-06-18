@@ -939,6 +939,9 @@
 /* Module: tcdbsqlite.cxx = 92 */
 #define SQLITE_DB_ACCESS_ERROR              101920101
 
+/* Module: tcdbhbase.cxx = 96 */
+#define HBASE_DB_ACCESS_ERROR               101960101
+
 
 /**********************************************/
 

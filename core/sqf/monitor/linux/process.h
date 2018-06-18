@@ -463,6 +463,7 @@ private:
     bool         firstInstance_; // reset on persistent process re-creation
     bool         cmpOrEsp_;
     string       trafConf_;     // TRAF_CONF passed to object file
+    string       trafConfDb_;   // TRAF_CONF_DBSTORE passed to object file
     string       trafHome_;     // TRAF_HOME passed to object file
     string       trafVar_;      // TRAF_VAR passed to object file
 

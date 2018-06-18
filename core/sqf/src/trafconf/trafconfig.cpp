@@ -111,6 +111,11 @@ TC_Export int tc_initialize( bool traceEnabled
         case TCDBSQLITE:
             rc = TrafConfigDb.Initialize();
             break;
+#ifdef USE_HBASE
+        case TCDBHBASE:
+            rc = TrafConfigDb.Initialize();
+            break;
+#endif
         default:
             rc = TCNOTIMPLEMENTED;
     }

@@ -23,20 +23,22 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TCDBSQLITE_H_
-#define TCDBSQLITE_H_
+#ifndef TCDBHBASE_H_
+#define TCDBHBASE_H_
 
 #include <stdlib.h>
-#include <sqlite3.h>
+
 #include "trafconf/trafconfig.h"
 #include "tcdbstore.h"
 
-class CTcdbSqlite : public CTcdbStore
+#include "tcdbhbaseconfig.h"
+
+class CTcdbHbase : public CTcdbStore
 {
 public:
 
-    CTcdbSqlite( void );
-    ~CTcdbSqlite( void );
+    CTcdbHbase( void );
+    ~CTcdbHbase( void );
 
     int         AddLNodeData( int nid
                             , int pnid
@@ -44,10 +46,18 @@ public:
                             , int lastCore
                             , int processors
                             , int roles );
+    int         AddNameServer( const char *nodeName );
     int         AddPNodeData( const char *name
                             , int pnid
                             , int excludedFirstCore
                             , int excludedLastCore );
+    int         AddSNodeData( const char *name
+                            , int         pNid
+                            , int         spNid
+                            , int         firstCore
+                            , int         lastCore );
+    int         AddRegistryPersistentData( const char *keyName
+                                         , const char *valueName );
     int         AddRegistryKey( const char *key );
     int         AddRegistryProcess( const char *name );
     int         AddRegistryClusterData( const char *key, const char *dataValue );
@@ -57,8 +67,13 @@ public:
     int         AddUniqueString( int nid, int id, const char *uniqStr );
     int         Close( void );
     int         DeleteData( void );
+    int         DeleteNameServer( const char *nodeName );
+    int         DeleteNameServerData();
     int         DeleteNodeData( int pnid );
+    int         DeleteRegistryPersistentData();
     int         DeleteUniqueString( int nid );
+    int         GetNameServer( const char *nodeName );
+    int         GetNameServers( int *count, int max, char **nodeNames );
     int         GetNode( int nid
                        , TcNodeConfiguration_t &nodeConfig );
     int         GetNode( const char *name
@@ -88,7 +103,7 @@ public:
                                  , int &id );
     int         GetUniqueStringIdMax( int nid, int &id );
     int         Initialize( void );
-    inline bool IsInitialized( void ) { return( (db_ != NULL) ); }
+    inline bool IsInitialized( void ) { return( inited_ ); }
     int         UpdatePNodeConfig( int pnid
                                  , const char *name
                                  , int excludedFirstCore
@@ -124,8 +139,8 @@ private:
                         , int excludedFirstCore
                         , int excludedLastCore );
 
-    sqlite3   *db_;
+    CTcdbHbaseConfig *config_;
+    bool              inited_;
 };
 
-
-#endif /* TCDBSQLITE_H_ */
+#endif /* TCDBHBASE_H_ */

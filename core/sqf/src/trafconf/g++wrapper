@@ -1,0 +1,6 @@
+#!/bin/sh
+TOOLS=/mnt/dgeorge/TOOLS
+GCC=$TOOLS/g++
+export LD_LIBRARY_PATH=$GCC/lib:$GCC/lib64:$LD_LIBRARY_PATH
+export PATH=$GCC/bin:$PATH
+g++ -std=c++11 $*
