@@ -19,7 +19,8 @@
 #
 # @@@ END COPYRIGHT @@@
 
-USE_HBASE = 0
+# uncomment to use HBASE
+#USE_HBASE = 1
 ifdef USE_HBASE
 CXX64           = g++wrapper
 endif
