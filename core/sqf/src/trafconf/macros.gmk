@@ -19,7 +19,13 @@
 #
 # @@@ END COPYRIGHT @@@
 
-# his allows logging
+# uncomment to use HBASE
+USE_HBASE = 1
+ifdef USE_HBASE
+CXX64           = g++wrapper
+endif
+
+# this allows logging
 USE_LOGGING	= 1
 
 ifndef SQ_MTYPE
@@ -34,6 +40,9 @@ endif
 SRCSBDIR	= ../seabed/src
 
 INCMISCDIR	+= -I$(SRCSBDIR)
+ifdef USE_HBASE
+INCMISCDIR	+= -I/mnt/dgeorge/TOOLS/thrift/include
+endif
 
 # export
 EXPROOT		= $(TRAF_HOME)/export
@@ -81,6 +90,9 @@ else
    CWARN		= $(HPCWARN) $(GOPTS)
    CXXWARN		= $(HPCXXWARN) $(GOPTS)
 endif
+ifdef USE_HBASE
+GOPTS += -DUSE_HBASE
+endif
 
 INCLUDES	= -I$(INCEXPDIR) $(INCMISCDIR)
 
@@ -93,6 +105,26 @@ LIBTRAFCONFIGX	= -L$(LIBEXPDIR) -ltrafconfig
 
 # Trafodion Configuration Utility
 TRAFCONF		= $(BINEXPDIR)/trafconf
+
+# Trafodion Configuration HB Library
+LIBTRAFCONFHB	= $(LIBEXPDIR)/libtrafconfhb.so
+LIBTRAFCONFHBX= -L$(LIBEXPDIR) -ltrafconfhb
+
+ifdef USE_HBASE
+# Thrift library
+LIBTHRIFTX	= -L/mnt/dgeorge/TOOLS/thrift/lib -lthrift
+LIBTHRIFTXX	= -L/mnt/dgeorge/TOOLS/thrift/lib -Wl,-Bstatic -lthrift
+
+# Trafodion Configuration HB Driver
+TRAFCONFHBDRV		= $(BINEXPDIR)/trafconfhbdrv
+
+# Trafodion Configuration HB test
+TRAFCONFHBTST		= trafconfhbtest
+
+THRIFT	= thriftwrapper
+
+STATICLINKGLIB		= -static-libstdc++ -static-libgcc
+endif
 
 # common rules
 .c.o:

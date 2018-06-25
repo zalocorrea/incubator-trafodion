@@ -246,6 +246,7 @@ function listports {
 	MY_HBASE_MASTER_INFO_PORT_NUM
 	MY_HBASE_MASTER_PORT_NUM
 	MY_HBASE_REGIONSERVER_INFO_PORT_NUM
+	MY_HBASE_REGIONSERVER_THRIFT_PORT_NUM
 	MY_HBASE_REGIONSERVER_PORT_NUM
 	MY_HBASE_REST_PORT_NUM
 	MY_HBASE_ZOOKEEPER_LEADERPORT_NUM
@@ -436,6 +437,8 @@ if [ $USE_DEFAULT_PORTS == 'yes' ]; then
   MY_HBASE_REGIONSERVER_PORT_NUM=60020
   # hbase.regionserver.info.port
   MY_HBASE_REGIONSERVER_INFO_PORT_NUM=60030
+  # hbase.regionserver.thrift.port
+  MY_HBASE_REGIONSERVER_THRIFT_PORT_NUM=9090
   # hbase.zookeeper.peerport
   MY_HBASE_ZOOKEEPER_PEERPORT_NUM=2888
   # hbase.zookeeper.leaderport
@@ -469,6 +472,7 @@ else
   MY_HBASE_MASTER_INFO_PORT_NUM=`expr $MY_START_PORT + 161`
   MY_HBASE_REGIONSERVER_PORT_NUM=`expr $MY_START_PORT + 162`
   MY_HBASE_REGIONSERVER_INFO_PORT_NUM=`expr $MY_START_PORT + 163`
+  MY_HBASE_REGIONSERVER_THRIFT_PORT_NUM=`expr $MY_START_PORT + 164`
   MY_HBASE_ZOOKEEPER_PEERPORT_NUM=`expr $MY_START_PORT + 167`
   MY_HBASE_ZOOKEEPER_LEADERPORT_NUM=`expr $MY_START_PORT + 168`
   MY_HBASE_ZOOKEEPER_PROPERTY_CLIENTPORT_NUM=`expr $MY_START_PORT + 170`
@@ -757,6 +761,9 @@ echo "Starting HBase..."
 cd ${MY_SW_ROOT}
 . $MY_SW_SCRIPTS_DIR/sw_env.sh
 ./hbase/bin/start-hbase.sh
+if [ "\$TRAF_CONFIG_DBSTORE" = "HBASE" ]; then
+./hbase/bin/hbase-daemon.sh start thrift 
+fi
 EOF
 
   cat <<EOF >$MY_SW_SCRIPTS_DIR/swstophbase
@@ -764,6 +771,9 @@ EOF
 cd ${MY_SW_ROOT}
 . $MY_SW_SCRIPTS_DIR/sw_env.sh
 ./hbase/bin/stop-hbase.sh
+if [ "\$TRAF_CONFIG_DBSTORE" = "HBASE" ]; then
+./hbase/bin/hbase-daemon.sh stop thrift 
+fi
 EOF
 
   cat <<EOF >$MY_SW_SCRIPTS_DIR/swstatus
@@ -1447,6 +1457,10 @@ else
   <property>
     <name>hbase.regionserver.info.port</name>
     <value>${MY_HBASE_REGIONSERVER_INFO_PORT_NUM}</value>
+  </property>
+  <property>
+    <name>hbase.regionserver.thrift.port</name>
+    <value>${MY_HBASE_REGIONSERVER_THRIFT_PORT_NUM}</value>
   </property>
   <property>
     <name>hbase.zookeeper.peerport</name>

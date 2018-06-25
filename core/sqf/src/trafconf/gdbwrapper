@@ -1,0 +1,7 @@
+#!/bin/sh
+TOOLS=/mnt/dgeorge/TOOLS
+GCC=$TOOLS/g++
+GDB=$TOOLS/gdb
+export LD_LIBRARY_PATH=$GDB/lib:$GCC/lib:$GCC/lib64:$LD_LIBRARY_PATH
+export PATH=$GDB/bin:$PATH
+gdb $*

@@ -51,8 +51,10 @@ export TRAFODION_ENABLE_AUTHENTICATION=${TRAFODION_ENABLE_AUTHENTICATION:-NO}
 if [[ -n "$CLUSTERNAME" ]]; then
   # This is a cluster environment, not a workstation
   #export TRAF_CONFIG_DBSTORE=MySQL
+  #export TRAF_CONFIG_DBSTORE=HBASE
   export TRAF_CONFIG_DBSTORE=Sqlite
 else
+  #export TRAF_CONFIG_DBSTORE=HBASE
   export TRAF_CONFIG_DBSTORE=Sqlite
 fi
 

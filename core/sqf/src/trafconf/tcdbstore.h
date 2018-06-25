@@ -70,6 +70,7 @@ public:
                                        , int id
                                        , const char *uniqStr ) = 0;
     virtual int         Close( void ) = 0;
+    virtual int         DeleteData( void ) = 0;
     virtual int         DeleteNameServer( const char *nodeName ) = 0;
     virtual int         DeleteNodeData( int pnid ) = 0;
     virtual int         DeleteUniqueString( int nid ) = 0;

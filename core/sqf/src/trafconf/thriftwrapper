@@ -1,0 +1,6 @@
+#!/bin/sh
+TOOLS=/mnt/dgeorge/TOOLS
+GCC=$TOOLS/g++
+THRIFT=$TOOLS/thrift
+export LD_LIBRARY_PATH=$THRIFT/lib:$GCC/lib:$GCC/lib64:$LD_LIBRARY_PATH
+$THRIFT/bin/thrift $*

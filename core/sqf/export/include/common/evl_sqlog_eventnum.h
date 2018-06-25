@@ -1081,6 +1081,9 @@
 /* Module notice.cxx = 95 */
 #define NOTICE_NOTIFYREMOTE_1               101950101
 
+/* Module: tcdbhbase.cxx = 96 */
+#define HBASE_DB_ACCESS_ERROR               101960101
+
 /**********************************************/
 
 /*********** Seabed ***********/

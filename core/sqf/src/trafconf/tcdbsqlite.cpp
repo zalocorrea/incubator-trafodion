@@ -1028,6 +1028,31 @@ int CTcdbSqlite::Close( void )
     return( TCSUCCESS );
 }
 
+int CTcdbSqlite::DeleteData( void )
+{
+    const char method_name[] = "CTcdbSqlite::DeleteData";
+    TRACE_ENTRY;
+
+    if ( !IsInitialized() )  
+    {
+        if (TcTraceSettings & (TC_TRACE_REGISTRY | TC_TRACE_REQUEST | TC_TRACE_INIT))
+        {
+            trace_printf( "%s@%d Database is not initialized for access!\n"
+                        , method_name, __LINE__);
+        }
+        TRACE_EXIT;
+        return( TCNOTINIT );
+    }
+
+    char buf[TC_LOG_BUF_SIZE];
+    snprintf( buf, sizeof(buf),
+              "[%s] NOT IMPLEMENTED\n"
+            , method_name );
+    TcLogWrite( SQLITE_DB_ACCESS_ERROR, TC_LOG_ERR, buf );
+    TRACE_EXIT;
+    return( TCDBOPERROR );
+}
+
 int CTcdbSqlite::DeleteNameServer( const char *nodeName )
 {
     const char method_name[] = "CTcdbSqlite::DeleteNameServer";

@@ -73,6 +73,7 @@ FT_FLAG=1
 PERF_FLAG=0
 SQCONFIG_FILE=sqconfig
 SQCONFIG_DB_FILE=sqconfig.db
+DEL_DATA=0
 
 if [ -z $TRAF_HOME ]; then
     echo
@@ -162,6 +163,7 @@ else
         echo "The configuration file ($SQCONFIG_DB_FILE) was previously created."
         echo "Removing and re-creating $SQCONFIG_DB_FILE!"
         rm -f $SQCONFIG_DB_FILE
+        DEL_DATA=1
     fi
 fi
 
@@ -244,7 +246,7 @@ sqlite3 -init createConfigDb $SQCONFIG_DB_FILE <<eof
 .quit
 eof
 
-./gensq.pl $SQSCRIPT_FILE `hostname` $FT_FLAG $PERF_FLAG $SQCONFIG_FILE $TRAF_HOME/sql/scripts/sqconfig.persist
+./gensq.pl $SQSCRIPT_FILE `hostname` $FT_FLAG $PERF_FLAG $DEL_DATA $SQCONFIG_FILE $TRAF_HOME/sql/scripts/sqconfig.persist
 sq_stat=$?
 if [[ $sq_stat != 0 ]]; then 
     exit $sq_stat;

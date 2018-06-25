@@ -61,6 +61,7 @@
 #define TC_STORE_MYSQL             "MYSQL"
 #define TC_STORE_POSTGRESQL        "POSTGRESQL"
 #define TC_STORE_SQLITE            "SQLITE"
+#define TC_STORE_HBASE             "HBASE"
 
 #define PERSIST_PROCESS_KEYS       "PERSIST_PROCESS_KEYS"
 #define PERSIST_PROCESS_NAME_KEY   "PROCESS_NAME"
@@ -115,6 +116,7 @@ typedef enum {
     , TCDBMYSQL          = 1 // MySQL Database
     , TCDBPOSTGRESQL     = 2 // PostgresQL Database   [TBD]
     , TCDBSQLITE         = 3 // Sqlite Database
+    , TCDBHBASE          = 4 // Hbase Database
 } TcStorageType_t;
 
 typedef enum {
