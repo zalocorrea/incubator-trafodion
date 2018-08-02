@@ -1399,7 +1399,7 @@ if (hTabStats->isOrcFile())
   hdfsscan_tdb->setUseCif(useCIF);
   hdfsscan_tdb->setUseCifDefrag(useCIFDegrag);
 
-  if (CmpCommon::getDefault(USE_LIBHDFS_SCAN) == DF_ON)
+  if (CmpCommon::getDefault(USE_LIBHDFS) == DF_ON)
      hdfsscan_tdb->setUseLibhdfsScan(TRUE);
 
   hdfsscan_tdb->setCompressedFile(isCompressedFile);
@@ -3146,7 +3146,7 @@ short HbaseAccess::codeGen(Generator * generator)
 
   generator->setHBaseNumCacheRows(MAXOF(getEstRowsAccessed().getValue(),
                                         getMaxCardEst().getValue()), 
-                                  hbpa, samplePercent()) ;
+                                  hbpa, hbaseRowSize,samplePercent()) ;
   generator->setHBaseCacheBlocks(hbaseRowSize,
                                  getEstRowsAccessed().getValue(),hbpa);
   generator->setHBaseSmallScanner(hbaseRowSize,
