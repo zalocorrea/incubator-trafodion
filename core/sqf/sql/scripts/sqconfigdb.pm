@@ -37,7 +37,7 @@ my $HBsocket;
 my $HBtransport;
 my $HBprotocol;
 my $HBclient;
-my $HBdriver = "trafconfhbdrv";
+my $HBdriver = "trafconfhb";
 
 sub addDbKeyName {
 
@@ -136,12 +136,37 @@ sub addDbNameServer {
 
     my $nodeName    = $_[0];
 
-    my $insDbNameServerStmt = $DBH->prepare("insert into monRegNameServer values (?, ?)");
+    if ($HBASEDB == 1) {
+        eval {
+            system($HBdriver, "addDbNameServer", $nodeName);
+        };
+        if ($?) {
+            print "Unable to add name server\n"
+        }
+    } else {
+        my $insDbNameServerStmt = $DBH->prepare("insert into monRegNameServer values (?, ?)");
 
-    $insDbNameServerStmt->bind_param(1, $nodeName);
-    $insDbNameServerStmt->bind_param(2, $nodeName);
+        $insDbNameServerStmt->bind_param(1, $nodeName);
+        $insDbNameServerStmt->bind_param(2, $nodeName);
 
-    $insDbNameServerStmt->execute;
+        $insDbNameServerStmt->execute;
+    }
+}
+
+sub delDbData {
+    if (not defined $DBH) {
+        # Database not available
+        return;
+    }
+
+    if ($HBASEDB == 1) {
+        eval {
+            system($HBdriver, "delDbData");
+        };
+        if ($?) {
+            print "Unable to delete data\n"
+        }
+    }
 }
 
 sub delDbNameServerData {
@@ -150,8 +175,17 @@ sub delDbNameServerData {
         return;
     }
 
-    my $delDbNameServerStmt = $DBH->prepare("delete from monRegNameServer");
-    $delDbNameServerStmt->execute;
+    if ($HBASEDB == 1) {
+        eval {
+            system($HBdriver, "delDbNameServerData");
+        };
+        if ($?) {
+            print "Unable to delete name server data\n"
+        }
+    } else {
+        my $delDbNameServerStmt = $DBH->prepare("delete from monRegNameServer");
+        $delDbNameServerStmt->execute;
+    }
 }
 
 #sub addDbProcData {
@@ -251,22 +285,6 @@ sub addDbPersistData {
     }
 }
 
-sub delDbData {
-    if (not defined $DBH) {
-        # Database not available
-        return;
-    }
-
-    if ($HBASEDB == 1) {
-        eval {
-            system($HBdriver, "delDbData");
-        };
-        if ($?) {
-            print "Unable to delete data\n"
-        }
-    }
-}
-
 sub delDbPersistData {
     if (not defined $DBH) {
         # Database not available
@@ -333,7 +351,7 @@ sub addDbLNode {
     my $firstCore     = $_[4];
     my $lastCore      = $_[5];
 
-   if ($HBASEDB == 1) {
+    if ($HBASEDB == 1) {
         eval {
             system($HBdriver, "addDbLNode", $lNodeId, $pNodeId, $numProcessors, $roleSet, $firstCore, $lastCore);
         };
@@ -390,13 +408,22 @@ sub addDbUniqStr {
     my $lv_id       = $_[1];
     my $lv_str      = $_[2];
 
-    my $insDbUniqStrStmt = $DBH->prepare("insert or replace into monRegUniqueStrings values ( ?, ?, ?)");
+    if ($HBASEDB == 1) {
+        eval {
+            system($HBdriver, "addDbUniqStr", $lv_nid, $lv_id, $lv_str);
+        };
+        if ($?) {
+            print "Unable to add unique string\n"
+        }
+    } else {
+        my $insDbUniqStrStmt = $DBH->prepare("insert or replace into monRegUniqueStrings values ( ?, ?, ?)");
 
-    $insDbUniqStrStmt->bind_param(1, $lv_nid);
-    $insDbUniqStrStmt->bind_param(2, $lv_id);
-    $insDbUniqStrStmt->bind_param(3, $lv_str);
+        $insDbUniqStrStmt->bind_param(1, $lv_nid);
+        $insDbUniqStrStmt->bind_param(2, $lv_id);
+        $insDbUniqStrStmt->bind_param(3, $lv_str);
 
-    $insDbUniqStrStmt->execute;
+        $insDbUniqStrStmt->execute;
+    }
 }
 
 sub listNodes {
@@ -429,8 +456,8 @@ sub openDb {
     if ($HBASEDB == 1) {
     } else {
         $DBH = DBI->connect("dbi:SQLite:dbname=sqconfig.db","","",$dbargs);
-#       Disable database synchronization (fsync) because it slows down writes
-#       too much.
+#   Disable database synchronization (fsync) because it slows down writes
+#   too much.
         $DBH->do("PRAGMA synchronous = OFF");
     }
 }

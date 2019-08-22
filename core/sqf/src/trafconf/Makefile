@@ -51,7 +51,7 @@ LIBSX	+=  -lpthread
 
 PROGS		= $(TRAFCONF)
 ifdef USE_HBASE
-PROGS +=	  $(TRAFCONFHBDRV)
+PROGS +=	  $(TRAFCONFHB)
 PROGS +=	  $(TRAFCONFHBTST)
 endif
 
@@ -84,7 +84,7 @@ OBJTRAFCONFHB	= $(OUTDIR)/tcdbhbase.o \
 		  $(OUTDIR)/otrace.o \
 		  $(OUTDIR)/threadtls.o
 
-OBJTRAFCONFHBDRV= $(OUTDIR)/tcdbhbasedriver.o \
+OBJTRAFCONFHBUTL= $(OUTDIR)/tcdbhbaseutl.o \
 		  $(OUTDIR)/tcdbhbase.o \
 		  $(OUTDIR)/tcdbhbaseconfig.o \
 		  $(OUTDIR)/tcdbhbasegenconst.o \
@@ -140,12 +140,12 @@ $(LIBEXPDIR)/libtrafconfhb.so: $(OBJTRAFCONFHB)
 	@echo $(CXX) $(LIBSX) $(LNK_FLGS) -shared -o $@ $(OBJTRAFCONFHB)
 	$(CXX) $(LIBSX) $(LNK_FLGS) -shared -o $@ $(OBJTRAFCONFHB) $(LIBTHRIFTXX) $(STATICLINKGLIB)
 
-$(BINEXPDIR)/trafconfhbdrv: $(OBJTRAFCONFHBDRV)
+$(BINEXPDIR)/trafconfhb: $(OBJTRAFCONFHBUTL)
 	@echo 
-	@echo Building Trafodion Configuration HB driver
+	@echo Building Trafodion Configuration HB utility
 	@echo 
-	@echo $(CXX) $(LIBSX) $(CDEPFLAGS) $(FLAGS) $(OPTIONS) $(INCLUDES) -o $@ $(OBJTRAFCONFHBDRV)
-	$(CXX) $(LIBSX) $(LIBTRAFCONFX) $(CDEPFLAGS) $(FLAGS) $(OPTIONS) $(INCLUDES) -o $@ $(OBJTRAFCONFHBDRV) $(LIBTHRIFTXX) $(STATICLINKGLIB)
+	@echo $(CXX) $(LIBSX) $(CDEPFLAGS) $(FLAGS) $(OPTIONS) $(INCLUDES) -o $@ $(OBJTRAFCONFHBUTL)
+	$(CXX) $(LIBSX) $(LIBTRAFCONFX) $(CDEPFLAGS) $(FLAGS) $(OPTIONS) $(INCLUDES) -o $@ $(OBJTRAFCONFHBUTL) $(LIBTHRIFTXX) $(STATICLINKGLIB)
 
 trafconfhbtest: $(OBJTRAFCONFHBTST)
 	@echo 

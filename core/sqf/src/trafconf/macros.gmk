@@ -116,7 +116,7 @@ LIBTHRIFTX	= -L/mnt/dgeorge/TOOLS/thrift/lib -lthrift
 LIBTHRIFTXX	= -L/mnt/dgeorge/TOOLS/thrift/lib -Wl,-Bstatic -lthrift
 
 # Trafodion Configuration HB Driver
-TRAFCONFHBDRV		= $(BINEXPDIR)/trafconfhbdrv
+TRAFCONFHB		= $(BINEXPDIR)/trafconfhb
 
 # Trafodion Configuration HB test
 TRAFCONFHBTST		= trafconfhbtest

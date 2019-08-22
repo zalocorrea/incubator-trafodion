@@ -27,8 +27,7 @@
 #define TCDB_H_
 
 #include <stdlib.h>
-//#include "tcdbmysql.h"
-#include "tcdbsqlite.h"
+#include "tcdbstore.h"
 #include "trafconf/trafconfig.h"
 
 using namespace std;
